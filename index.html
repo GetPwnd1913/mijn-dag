@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mijn dag">
+<meta name="theme-color" content="#2f6f62">
+<title>Mijn dag</title>
+<style>
+  :root{
+    --bg:#f4f1ea; --card:#ffffff; --ink:#1f2a28; --muted:#66706d; --line:#e3ded3;
+    --accent:#2f6f62; --accent-soft:#e3efeb; --warm:#c8743a; --warm-soft:#f8e9dd;
+    --radius:16px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#141a19; --card:#1d2523; --ink:#e9eeec; --muted:#9aa6a2; --line:#2c3633;
+      --accent:#6cbfa9; --accent-soft:#22332f; --warm:#e0985f; --warm-soft:#3a2b20; }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font:17px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+  .wrap{max-width:620px;margin:0 auto;padding:16px 14px 120px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:4px 2px 12px}
+  h1{font-size:26px;margin:0;letter-spacing:-.3px}
+  .status{font-size:13px;color:var(--muted);text-align:right}
+  .tabs{display:flex;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px;margin-bottom:14px}
+  .tabs button{flex:1;border:0;background:none;padding:9px;border-radius:999px;font:inherit;font-size:15px;color:var(--muted)}
+  .tabs button.on{background:var(--accent);color:#fff;font-weight:600}
+  .datebar{display:flex;align-items:center;justify-content:space-between;margin:0 2px 12px}
+  .datebar .d{font-weight:600;text-transform:capitalize;text-align:center;flex:1}
+  .iconbtn{border:1px solid var(--line);background:var(--card);color:var(--ink);width:40px;height:40px;border-radius:50%;font-size:18px}
+  .iconbtn:disabled{opacity:.3}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+  .card.done{border-color:var(--accent)}
+  .info{display:grid;grid-template-columns:auto 1fr;gap:8px 12px;align-items:center}
+  .info .k{color:var(--muted);font-size:15px}
+  .info .v{font-weight:600}
+  .info input{width:100%;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit;font-size:16px;background:var(--bg);color:var(--ink)}
+  .intro{font-size:15px;color:var(--muted);margin:12px 0 0}
+  .linkbtn{border:0;background:none;color:var(--accent);font:inherit;font-size:14px;padding:0}
+  .qhead{display:flex;gap:10px;align-items:flex-start}
+  .num{flex:none;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);
+    display:grid;place-items:center;font-size:14px;font-weight:700}
+  .card.done .num{background:var(--accent);color:#fff}
+  .qtitle{font-weight:650;font-size:18px;margin:1px 0 0}
+  .tipbtn{border:0;background:none;color:var(--accent);font:inherit;font-size:14px;padding:4px 0;margin-top:2px}
+  .tip{font-size:15px;color:var(--muted);background:var(--accent-soft);border-radius:12px;padding:10px 12px;margin-top:8px}
+  .scale{display:flex;gap:8px;margin-top:12px}
+  .scale button{flex:1;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:11px 4px;font:inherit;font-size:15px}
+  .scale button.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+  .scale button.on.warn{background:var(--warm);border-color:var(--warm)}
+  .score{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:12px}
+  .score button{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:10px 0;font:inherit;font-weight:600}
+  .score button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .label{font-size:13px;color:var(--muted);margin:12px 0 6px;text-transform:uppercase;letter-spacing:.4px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:7px 12px;font:inherit;font-size:14px}
+  .chip:active{transform:scale(.97)}
+  .chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .chip.feel.on{background:var(--warm);color:#fff}
+  .chip.start{border-style:dashed}
+  .chip.feel{background:var(--warm-soft);border-color:transparent}
+  textarea{width:100%;min-height:92px;margin-top:10px;border:1px solid var(--line);border-radius:12px;padding:11px;
+    font:inherit;font-size:16px;background:var(--bg);color:var(--ink);resize:vertical}
+  textarea.big{min-height:170px}
+  textarea:focus,.info input:focus{outline:2px solid var(--accent);border-color:transparent}
+  .bottom{position:fixed;left:0;right:0;bottom:0;background:color-mix(in srgb,var(--bg) 88%,transparent);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:10px 14px calc(10px + env(safe-area-inset-bottom))}
+  .bottom .in{max-width:620px;margin:0 auto;display:flex;align-items:center;gap:12px}
+  .prog{flex:1}
+  .bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:4px}
+  .bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+  .prog small{color:var(--muted);font-size:13px}
+  .primary{border:0;background:var(--accent);color:#fff;border-radius:12px;padding:12px 16px;font:inherit;font-weight:600;font-size:15px;text-decoration:none;display:inline-block}
+  .ghost{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;padding:11px 14px;font:inherit;font-size:15px;text-decoration:none;display:inline-block}
+  .hist .item{display:flex;gap:12px;align-items:center;cursor:pointer}
+  .hist .emo{font-size:20px;font-weight:700;width:44px;height:44px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:none}
+  .hist .t{font-weight:600;text-transform:capitalize}
+  .hist .s{color:var(--muted);font-size:14px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .empty{color:var(--muted);text-align:center;padding:30px 10px}
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;justify-content:center;z-index:10}
+  .overlay.show{display:flex}
+  .sheet{background:var(--card);width:100%;max-width:620px;max-height:88vh;overflow:auto;border-radius:20px 20px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom))}
+  .sheet h2{margin:0 0 4px;font-size:21px}
+  .sheet pre{white-space:pre-wrap;font:inherit;font-size:15px;background:var(--bg);border-radius:12px;padding:12px;margin:12px 0}
+  .row{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+  .note{font-size:13px;color:var(--muted);margin-top:10px}
+  .field{margin-top:12px}
+  .field label{display:block;font-size:14px;color:var(--muted);margin-bottom:4px}
+  .field input{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;font-size:16px;background:var(--bg);color:var(--ink)}
+  .jftbody{font-size:16px;line-height:1.55;margin-bottom:12px}
+  .jftbody p{margin:0 0 10px}
+  .jftbody p.quote{font-style:italic}
+  .jftbody p.avv{font-weight:600}
+  .hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Mijn dag</h1>
+    <div class="status" id="status">Bezig met laden…</div>
+  </header>
+
+  <div class="tabs">
+    <button id="tabToday" class="on">Invullen</button>
+    <button id="tabHist">Eerdere dagen</button>
+  </div>
+
+  <section id="viewToday">
+    <div class="datebar">
+      <button class="iconbtn" id="prevDay" aria-label="Vorige dag">‹</button>
+      <div class="d" id="dateLabel"></div>
+      <button class="iconbtn" id="nextDay" aria-label="Volgende dag">›</button>
+    </div>
+
+    <div class="card" style="background:var(--accent-soft);border-color:transparent">
+      <div class="qtitle">Alleen voor vandaag</div>
+      <div id="jftHave" class="hidden">
+        <div class="note" id="jftDate" style="margin:2px 0 0;text-transform:capitalize"></div>
+        <div id="jftTitle" style="font-weight:650;font-size:20px;margin:2px 0 10px"></div>
+        <div id="jftBody" class="hidden jftbody"></div>
+        <div class="row" style="justify-content:flex-start">
+          <button class="primary" id="jftToggle" type="button">Lees de tekst</button>
+        </div>
+        <button class="linkbtn" id="jftChange" type="button" style="margin-top:10px">Ander bestand kiezen</button>
+      </div>
+      <div id="jftNone">
+        <div class="note" style="margin:2px 0 12px">Kies één keer je eigen PDF van ‘Alleen voor vandaag’. Daarna zie je hier elke dag automatisch de tekst van die datum. Het bestand blijft op je telefoon.</div>
+        <div class="row" style="justify-content:flex-start">
+          <button class="primary" id="jftPick" type="button">Mijn bestand kiezen</button>
+        </div>
+        <div class="note" style="margin-top:12px">Of lees online: <a href="https://www-jftna-org.translate.goog/jft/?_x_tr_sl=en&amp;_x_tr_tl=nl&amp;_x_tr_hl=nl" target="_blank" rel="noopener" style="color:var(--accent)">vertaald naar Nederlands</a> · <a href="https://www.jftna.org/jft/" target="_blank" rel="noopener" style="color:var(--accent)">origineel (Engels)</a></div>
+      </div>
+      <div class="note" id="jftMsg"></div>
+      <input type="file" id="jftFile" accept="application/pdf,.pdf" class="hidden">
+    </div>
+
+    <div class="card">
+      <div class="info">
+        <div class="k">Naam</div><div class="v" id="infoNaam">–</div>
+        <div class="k">Aantal dagen nuchter/clean</div><div class="v" id="infoDagen">–</div>
+        <div class="k">Datum</div><div class="v" id="infoDatum">–</div>
+      </div>
+      <p class="intro">Bij een dagbeschouwing doe je zelfonderzoek. Je gaat na wat er op de dag goed verlopen is en wat voor verbetering vatbaar is. Wees open en eerlijk.</p>
+      <button class="linkbtn" id="openSettings" type="button">Gegevens instellen</button>
+    </div>
+
+    <div id="questions"></div>
+  </section>
+
+  <section id="viewHistWrap" class="hidden">
+    <div class="card">
+      <div class="qtitle">Back-up</div>
+      <div class="note" style="margin:2px 0 12px">Bewaar al je dagen in één bestand. Met dat bestand zet je ze later terug, ook op een ander toestel.</div>
+      <div class="row" style="justify-content:flex-start">
+        <button class="primary" id="backupMake" type="button">Back-up maken</button>
+        <button class="ghost" id="backupRestore" type="button">Back-up terugzetten</button>
+      </div>
+      <div class="note" id="backupMsg"></div>
+      <input type="file" id="backupFile" accept="application/json,.json" class="hidden">
+    </div>
+    <section id="viewHist" class="hist"></section>
+  </section>
+</div>
+
+<div class="bottom" id="bottomBar">
+  <div class="in">
+    <div class="prog">
+      <small id="progText">0 van 13 vragen</small>
+      <div class="bar"><i id="progBar"></i></div>
+    </div>
+    <button class="primary" id="summaryBtn">Afronden</button>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="sheet">
+    <h2>Dagbeschouwing</h2>
+    <div class="note" id="sumNote"></div>
+    <pre id="sumText"></pre>
+    <div class="row" style="margin-bottom:10px;justify-content:stretch"><button class="primary" id="saveDocx" style="flex:1">Word-bestand</button><button class="primary" id="savePdf" style="flex:1">PDF-bestand</button></div>
+    <div class="note" id="docxMsg" style="margin:-4px 0 10px"></div>
+    <div class="row">
+      <button class="ghost" id="editDay">Aanpassen</button>
+      <button class="ghost" id="closeSum">Sluiten</button>
+      <button class="ghost" id="copySum">Kopieer tekst</button>
+    </div>
+    <div class="note" id="copyMsg"></div>
+    <div class="note" id="mailRow"></div>
+  </div>
+</div>
+
+<div class="overlay" id="setOverlay">
+  <div class="sheet">
+    <h2>Gegevens</h2>
+    <div class="note">Dit vul je één keer in. Het aantal dagen wordt daarna elke dag vanzelf uitgerekend.</div>
+    <div class="field"><label for="setNaam">Naam</label><input id="setNaam" autocomplete="name"></div>
+    <div class="field"><label for="setSince">Nuchter/clean sinds</label><input id="setSince" type="date"></div>
+    <div class="field"><label for="setMail">Mailadres voor je dagbeschouwing (mag leeg)</label><input id="setMail" type="email" inputmode="email" autocomplete="off"></div>
+    <div class="row" style="margin-top:16px">
+      <button class="ghost" id="setCancel">Annuleren</button>
+      <button class="primary" id="setSave">Opslaan</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+(function(){
+  const YNB = [["nee","Nee"],["beetje","Een beetje"],["ja","Ja"]];
+  const WHO = ["mezelf","iemand thuis","mijn familie","een vriend","mijn sponsor","een hulpverlener","iemand op werk/school","een onbekende"];
+  const FEELINGS = ["onrustig","gespannen","verdrietig","eenzaam","onzeker","boos","schuldig","beschaamd","moe","overweldigd","jaloers","opgelucht","rustig","blij"];
+  const COPING = ["mijn sponsor gebeld","iemand anders gebeld","erover gepraat","naar een meeting gegaan","naar buiten gegaan","afleiding gezocht","de situatie verlaten","gebeden of gemediteerd","de film doorgespoeld tot het eind","iets gegeten of gedronken","gewacht tot het overging","literatuur gelezen"];
+  const TRIGGERS = ["een plek","bepaalde mensen","geld","stress","verveling","eenzaamheid","boosheid","vermoeidheid","honger","muziek","social media","middelen zien of ruiken","een herinnering","een ruzie"];
+
+  // Each row: label (the question shown), lead (start of the sentence), items. Tapping builds one sentence per row.
+  const QUESTIONS = [
+    {id:"q1", title:"Beschrijf wat je hebt gedaan vandaag. Wat waren je gevoelens hierbij. Hoe ging je hier mee om", type:"free",
+     tip:"Loop je dag door van ’s ochtends tot ’s avonds. Schrijf bij elk moment op wat je voelde en wat je daarmee deed."},
+    {id:"q2", title:"Ben ik eerlijk geweest?", type:"scale", opts:[["ja","Ja"],["grotendeels","Grotendeels"],["nee","Nee"]], doneOn:["ja"], detailOn:["grotendeels","nee"],
+     tip:"Ook kleine dingen tellen: een smoesje, iets weglaten, overdrijven, of doen alsof het goed gaat terwijl dat niet zo is. En: ben je eerlijk geweest tegen jezelf?",
+     rows:[
+       {label:"Tegen wie was ik niet eerlijk?", lead:"Ik was niet helemaal eerlijk tegen", items:WHO},
+       {label:"Wat deed ik?", lead:"Wat ik deed:", items:["iets verzwegen","een smoesje gebruikt","overdreven","gedaan alsof het goed ging","iets beloofd wat ik niet nakwam","een leugentje verteld"]},
+       {label:"Hoe zet ik het recht?", lead:"Ik kan dit rechtzetten door", items:["het alsnog eerlijk te vertellen","sorry te zeggen","het te bespreken met mijn sponsor","het morgen anders te doen"]}
+     ],
+     yesText:"Ja, ik ben vandaag eerlijk geweest."},
+    {id:"q3", title:"Heb ik conflicten gehad? Wat heb ik er mee gedaan?", type:"scale", opts:YNB, doneOn:["nee"], detailOn:["beetje","ja"],
+     tip:"Een conflict kan ook klein zijn: irritatie, een discussie, of iets wat je inslikte. Kijk naar wat jij deed en wat jouw deel was.",
+     rows:[
+       {label:"Met wie had ik een conflict?", lead:"Ik had een conflict met", items:WHO},
+       {label:"Hoe voelde ik me?", lead:"Ik voelde me", items:FEELINGS, cls:"feel"},
+       {label:"Wat heb ik ermee gedaan?", lead:"Wat ik ermee gedaan heb:", items:["het uitgepraat","rustig gebleven","even afstand genomen","sorry gezegd","het besproken met mijn sponsor","het losgelaten","boos gereageerd","het opgekropt"]},
+       {label:"Wat was mijn eigen deel?", lead:"Mijn eigen deel was:", items:["ik reageerde te snel","ik luisterde niet goed","ik wilde mijn gelijk halen","ik was moe of gespannen","ik zei niet wat ik voelde"]}
+     ],
+     noText:"Nee, ik heb vandaag geen conflicten gehad."},
+    {id:"q4", title:"Wat heb ik gedaan voor herstel: meeting, stappen, sponsor bellen en service?", type:"open",
+     tip:"Tik aan wat je gedaan hebt en vul aan met details: welke meeting, aan welke stap je werkte, waar je het met je sponsor over had.",
+     rows:[
+       {label:"Wat heb ik gedaan?", lead:"Voor mijn herstel heb ik", items:["een meeting bezocht","aan mijn stappen gewerkt","mijn sponsor gebeld","service gedaan","literatuur gelezen","gebeden of gemediteerd","contact gehad met iemand uit het programma","therapie of groep gehad","deze dagbeschouwing ingevuld"]}
+     ]},
+    {id:"q5", title:"Heb ik cravings gehad vandaag? Zo ja, hoe ben ik er mee om gegaan", type:"scale", opts:YNB, doneOn:["nee"], detailOn:["beetje","ja"],
+     tip:"Een craving is zucht of verlangen naar gebruiken. Schrijf op wanneer het kwam, hoe sterk het was en wat je hebt gedaan zodat het overging.",
+     rows:[
+       {label:"Hoe sterk was het?", lead:"De craving was", items:["1","2","3","4","5","6","7","8","9","10"].map(n=>n+" uit 10"), single:true},
+       {label:"Wanneer kwam het?", lead:"Het kwam", items:["’s ochtends","’s middags","’s avonds","toen ik alleen was","toen ik stress had","toen ik me verveelde","na een ruzie","toen ik moe was"]},
+       {label:"Wat heb ik gedaan?", lead:"Wat ik heb gedaan:", items:COPING}
+     ],
+     noText:"Nee, ik heb vandaag geen cravings gehad."},
+    {id:"q6", title:"Waren er triggers? Zo ja, hoe ben ik er mee om gegaan?", type:"scale", opts:YNB, doneOn:["nee"], detailOn:["beetje","ja"],
+     tip:"Een trigger is iets wat de zucht kan oproepen: een plek, mensen, een gevoel of een situatie. Check ook HALT: had je Honger, was je Boos, Eenzaam of Moe?",
+     rows:[
+       {label:"Wat was de trigger?", lead:"Mijn trigger was:", items:TRIGGERS},
+       {label:"Hoe voelde ik me?", lead:"Ik voelde me", items:FEELINGS, cls:"feel"},
+       {label:"Wat heb ik gedaan?", lead:"Wat ik heb gedaan:", items:COPING}
+     ],
+     noText:"Nee, ik had vandaag geen triggers."},
+    {id:"q7", title:"Wat ging er vandaag goed?", type:"open",
+     tip:"Kleine dingen tellen ook. Een dag zonder grote problemen is al iets wat goed ging.",
+     rows:[
+       {label:"Wat ging goed?", lead:"Vandaag ging goed:", items:["ik ben nuchter/clean gebleven","ik ben mijn afspraken nagekomen","ik heb iemand geholpen","ik heb om hulp gevraagd","ik heb goed voor mezelf gezorgd","ik ben naar buiten geweest","ik heb iets nieuws geleerd","ik heb eerlijk gezegd wat ik voelde","ik bleef rustig in een lastige situatie"]}
+     ]},
+    {id:"q8", title:"Wat kon er vandaag beter?", type:"open",
+     tip:"Niet om jezelf af te kraken, maar om ervan te leren. Wat neem je mee naar morgen?",
+     rows:[
+       {label:"Wat wil ik volgende keer anders doen?", lead:"Volgende keer wil ik", items:["eerder om hulp vragen","rustiger reageren","eerlijker zijn","beter voor mezelf zorgen","op tijd naar bed gaan","minder uitstellen","beter luisteren","mijn sponsor eerder bellen"]}
+     ]},
+    {id:"q9", title:"Is er vandaag iets gebeurd waar ik nog op terug wil komen?", type:"scale", opts:[["nee","Nee"],["ja","Ja"]], doneOn:["nee"], detailOn:["ja"],
+     tip:"Iets wat nog blijft hangen, wat je wilt uitpraten, rechtzetten of bespreken met je sponsor of begeleider.",
+     rows:[
+       {label:"Met wie wil ik erop terugkomen?", lead:"Ik wil erop terugkomen met", items:WHO.filter(w=>w!=="een onbekende")},
+       {label:"Wat wil ik doen?", lead:"Ik wil", items:["het uitpraten","sorry zeggen","het rechtzetten","het bespreken in de groep","er nog eens over nadenken"]}
+     ],
+     noText:"Nee."},
+    {id:"q10", title:"Waar ben ik vandaag dankbaar voor geweest?", type:"open",
+     tip:"Probeer er minstens drie te noemen. Groot of klein, alles mag.",
+     rows:[
+       {label:"Waar ben ik dankbaar voor?", lead:"Ik ben dankbaar voor", items:["mijn nuchterheid","mijn familie","mijn sponsor","de meeting","een goed gesprek","een dak boven mijn hoofd","goed eten","mijn gezondheid","de mensen om me heen","een nieuwe kans vandaag"]}
+     ]},
+    {id:"trots", title:"Waar ben ik trots op?", type:"open",
+     tip:"Geef jezelf erkenning. Waar heb je je best voor gedaan, ook als het niet perfect ging? Klein mag ook.",
+     rows:[
+       {label:"Waar ben ik trots op?", lead:"Ik ben trots", items:["dat ik nuchter/clean ben gebleven","dat ik deze dagbeschouwing invul","dat ik iets moeilijks heb gedaan","dat ik rustig bleef","dat ik eerlijk was","dat ik om hulp heb gevraagd","dat ik iemand heb geholpen","dat ik heb doorgezet"]}
+     ]},
+    {id:"q11", title:"Wat is mijn planning voor morgen?", type:"open",
+     tip:"Een simpele planning geeft houvast. Zet er ook iets voor je herstel in.",
+     rows:[
+       {label:"’s Ochtends", lead:"’s Ochtends:", items:["meeting","sponsor bellen","stappenwerk","afspraak met begeleider","sporten of wandelen","werk of dagbesteding","boodschappen","rustig aan doen"]},
+       {label:"’s Middags", lead:"’s Middags:", items:["meeting","sponsor bellen","stappenwerk","afspraak met begeleider","sporten of wandelen","werk of dagbesteding","boodschappen","rustig aan doen"]},
+       {label:"’s Avonds", lead:"’s Avonds:", items:["meeting","sponsor bellen","stappenwerk","dagbeschouwing invullen","sporten of wandelen","iets leuks doen","op tijd naar bed","rustig aan doen"]}
+     ]},
+    {id:"q12", title:"Welk cijfer geef ik deze dag en waarom dit cijfer?", type:"score",
+     tip:"Kies een cijfer van 1 tot 10 en leg uit waarom. Wat maakte de dag goed of zwaar?",
+     rows:[
+       {label:"Waarom dit cijfer?", lead:"Het cijfer komt door:", items:["een rustige dag","goede gesprekken","ik ben nuchter/clean gebleven","ik heb veel gedaan voor mijn herstel","stress","cravings","een conflict","ik was moe","ik voelde me goed"]}
+     ]}
+  ];
+
+  // ---------- helpers ----------
+  const $ = id => document.getElementById(id);
+  const pad = n => String(n).padStart(2,"0");
+  const keyOf = d => d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+  const parseKey = k => { const [y,m,d] = k.split("-").map(Number); return new Date(y,m-1,d); };
+  const todayKey = () => keyOf(new Date());
+  const longDate = k => parseKey(k).toLocaleDateString("nl-NL",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+  const shortDate = k => parseKey(k).toLocaleDateString("nl-NL",{day:"numeric",month:"long",year:"numeric"});
+  const niceDate = k => {
+    const t = todayKey(), y = keyOf(new Date(Date.now()-864e5));
+    const base = parseKey(k).toLocaleDateString("nl-NL",{weekday:"long",day:"numeric",month:"long"});
+    return k===t ? "Vandaag · "+base : k===y ? "Gisteren · "+base : base;
+  };
+  const daysClean = k => {
+    if(!settings.since) return null;
+    const n = Math.round((parseKey(k) - parseKey(settings.since))/864e5);
+    return n >= 0 ? n : null;
+  };
+  const emptyEntry = k => ({date:k, answers:{}, cijfer:"", updated:0});
+
+  // ---------- storage ----------
+  const LS = "dagbeschouwing:";
+  const local = {
+    get(k){ try{ const v = localStorage.getItem(LS+k); return v ? JSON.parse(v) : null; }catch(e){ return null; } },
+    set(k,v){ try{ localStorage.setItem(LS+k, JSON.stringify(v)); }catch(err){} },
+    days(){ const out=[]; try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k && k.indexOf(LS+"day:")===0){ try{ out.push(JSON.parse(localStorage.getItem(k))); }catch(e){} } } }catch(e){} return out; }
+  };
+  let col = null, setDoc = null;
+  let dbState = "pending";
+  let settings = local.get("settings") || {naam:"", since:"", mail:"", updated:0};
+
+  function setStatus(txt){ $("status").textContent = txt; }
+  function baseStatus(){
+    if(dbState==="on") return "Bewaard in je account · alleen jij ziet dit";
+    if(dbState==="off") return "Bewaard op dit toestel";
+    return "Verbinden…";
+  }
+
+  async function initDb(){
+    try{
+      if(!window.claude || !window.claude.use){ dbState="off"; return; }
+      const timeout = new Promise(r=>setTimeout(()=>r(null),10000));
+      const db = await Promise.race([window.claude.use("db"), timeout]);
+      const user = db ? await Promise.race([window.claude.use("user"), timeout]) : null;
+      const id = user ? await user.id() : null;
+      if(db && id){
+        const root = db.doc("data/users/"+id+"/dagbeschouwing");
+        col = root.collection("dagen");
+        setDoc = db.doc("data/users/"+id+"/instellingen");
+        dbState="on";
+      } else dbState="off";
+    }catch(e){ dbState="off"; col=null; setDoc=null; }
+  }
+
+  async function syncSettings(){
+    if(!setDoc) return;
+    try{
+      const s = await setDoc.get();
+      if(s.exists){
+        const r = s.data();
+        if((r.updated||0) >= (settings.updated||0)){ settings = Object.assign({}, r); local.set("settings", settings); renderInfo(); }
+        else await setDoc.set(Object.assign({}, settings));
+      } else if(settings.updated){ await setDoc.set(Object.assign({}, settings)); }
+    }catch(e){}
+  }
+
+  // ---------- state ----------
+  let curKey = todayKey();
+  let entry = local.get("day:"+curKey) || emptyEntry(curKey);
+  let dirty = false, saveTimer = null, saving = Promise.resolve();
+
+  function scheduleSave(){
+    dirty = true;
+    entry.updated = Date.now();
+    local.set("day:"+entry.date, entry);
+    setStatus("Opslaan…");
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(flush, 900);
+    updateProgress();
+  }
+  function flush(){
+    const snap = JSON.parse(JSON.stringify(entry));
+    saving = saving.then(async ()=>{
+      if(col){
+        try{ await col.doc(snap.date).set(snap); }
+        catch(e){
+          if(e && e.code==="unavailable"){ try{ await new Promise(r=>setTimeout(r,800+Math.random()*700)); await col.doc(snap.date).set(snap); }catch(e2){} }
+          else if(e && ["invalid_argument","revoked","not_granted","capability_disabled","capability_removed"].indexOf(e.code)>=0){ col=null; setDoc=null; dbState="off"; }
+        }
+      }
+      dirty = false;
+      setStatus("Opgeslagen ✓");
+      setTimeout(()=>{ if(!dirty) setStatus(baseStatus()); }, 1500);
+    });
+    return saving;
+  }
+
+  async function loadDay(k){
+    if(dirty){ clearTimeout(saveTimer); await flush(); }
+    curKey = k;
+    entry = local.get("day:"+k) || emptyEntry(k);
+    render();
+    if(col){
+      try{
+        const s = await col.doc(k).get();
+        if(curKey!==k || dirty) return;
+        if(s.exists){
+          const remote = s.data();
+          if(!entry.updated || (remote.updated||0) >= entry.updated){
+            entry = JSON.parse(JSON.stringify(remote));
+            local.set("day:"+k, entry); render();
+          } else flush();
+        } else if(entry.updated) flush();
+      }catch(e){}
+    }
+  }
+
+  // ---------- rendering ----------
+  function answer(id){ return entry.answers[id] || (entry.answers[id] = {level:"", text:""}); }
+  function isDoneIn(e, q){
+    const a = e.answers && e.answers[q.id];
+    const txt = a && (a.text||"").trim();
+    if(q.type==="score") return !!e.cijfer && !!txt;
+    if(!a) return false;
+    if(q.type==="scale") return q.doneOn.indexOf(a.level)>=0 || (q.detailOn.indexOf(a.level)>=0 && !!txt);
+    return !!txt;
+  }
+  const isDone = q => isDoneIn(entry, q);
+
+  function insertText(ta, q, txt, asLine){
+    const a = answer(q.id);
+    let v = ta.value;
+    if(asLine) v = v.trim() ? v.replace(/\s*$/,"") + "\n• " + txt : "• " + txt;
+    else if(txt.indexOf("…")>=0) v = v.trim() ? v.replace(/\s*$/,"") + "\n" + txt : txt;
+    else v = v.trim() ? v.replace(/\s*$/,"") + (/[\s,(]$/.test(v)?"":", ") + txt : txt;
+    ta.value = v; a.text = v;
+    scheduleSave(); markCard(q);
+    ta.focus();
+    const pos = v.indexOf("…", Math.max(0, v.length - txt.length - 2));
+    try{ if(pos>=0) ta.setSelectionRange(pos, pos+1); else ta.setSelectionRange(v.length, v.length); }catch(e){}
+  }
+
+  function chipRow(label, items, cls, onTap){
+    const wrap = document.createElement("div");
+    const l = document.createElement("div"); l.className="label"; l.textContent=label; wrap.appendChild(l);
+    const row = document.createElement("div"); row.className="chips";
+    items.forEach(t=>{ const b=document.createElement("button"); b.type="button"; b.className="chip "+(cls||""); b.textContent=t; b.onclick=()=>onTap(t); row.appendChild(b); });
+    wrap.appendChild(row);
+    return wrap;
+  }
+  function markCard(q){
+    const c = document.querySelector('[data-q="'+q.id+'"]');
+    if(c) c.classList.toggle("done", isDone(q));
+  }
+
+  function joinList(arr){ return arr.length < 2 ? (arr[0]||"") : arr.slice(0,-1).join(", ") + " en " + arr[arr.length-1]; }
+  function splitList(s){ return s.replace(/\.\s*$/,"").split(/,\s+|\s+en\s+/).map(x=>x.trim()).filter(Boolean); }
+  function findRowLine(lines, row){ return lines.findIndex(l => l.indexOf(row.lead + " ") === 0); }
+  function rowSelected(text, row){
+    const lines = (text||"").split("\n"); const i = findRowLine(lines, row);
+    return i < 0 ? [] : splitList(lines[i].slice(row.lead.length + 1));
+  }
+  function toggleRowItem(ta, q, row, item, refresh){
+    const a = answer(q.id);
+    const lines = ta.value ? ta.value.split("\n") : [];
+    const i = findRowLine(lines, row);
+    let list = i < 0 ? [] : splitList(lines[i].slice(row.lead.length + 1));
+    if(row.single) list = list[0] === item ? [] : [item];
+    else list = list.indexOf(item) >= 0 ? list.filter(x => x !== item) : list.concat([item]);
+    const sentence = row.lead + " " + joinList(list) + ".";
+    if(!list.length){ if(i >= 0) lines.splice(i, 1); }
+    else if(i >= 0) lines[i] = sentence;
+    else {
+      // keep the sentences in the same order as the rows
+      const order = q.rows.indexOf(row);
+      let at = lines.length;
+      for(let r = order + 1; r < q.rows.length; r++){ const j = findRowLine(lines, q.rows[r]); if(j >= 0){ at = j; break; } }
+      lines.splice(at, 0, sentence);
+    }
+    ta.value = lines.join("\n").replace(/\n{3,}/g, "\n\n").replace(/^\n+/, "");
+    a.text = ta.value;
+    scheduleSave(); markCard(q); refresh();
+  }
+  function buildRows(q, ta){
+    const box = document.createElement("div");
+    const chips = [];
+    const refresh = () => chips.forEach(c => c.el.classList.toggle("on", rowSelected(ta.value, c.row).indexOf(c.item) >= 0));
+    (q.rows||[]).forEach(row => {
+      const l = document.createElement("div"); l.className = "label"; l.textContent = row.label; box.appendChild(l);
+      const wrapEl = document.createElement("div"); wrapEl.className = "chips";
+      row.items.forEach(item => {
+        const b = document.createElement("button"); b.type = "button"; b.className = "chip " + (row.cls||""); b.textContent = item;
+        b.onclick = () => toggleRowItem(ta, q, row, item, refresh);
+        chips.push({el:b, row, item}); wrapEl.appendChild(b);
+      });
+      box.appendChild(wrapEl);
+    });
+    ta.addEventListener("input", refresh);
+    refresh();
+    return box;
+  }
+
+  window.__rows = {toggleRowItem: (...a)=>toggleRowItem(...a), QUESTIONS, entryRef: ()=>entry};
+  function buildQuestion(q, i){
+    const a = answer(q.id);
+    const card = document.createElement("div");
+    card.className = "card"; card.dataset.q = q.id;
+
+    const head = document.createElement("div"); head.className="qhead";
+    head.innerHTML = '<div class="num">'+(i+1)+'</div><div style="flex:1"><div class="qtitle"></div><button class="tipbtn" type="button">Hulp bij deze vraag</button><div class="tip hidden"></div></div>';
+    head.querySelector(".qtitle").textContent = q.title;
+    const tip = head.querySelector(".tip"); tip.textContent = q.tip;
+    head.querySelector(".tipbtn").onclick = e => { tip.classList.toggle("hidden"); e.target.textContent = tip.classList.contains("hidden") ? "Hulp bij deze vraag" : "Verberg hulp"; };
+    card.appendChild(head);
+
+    const ta = document.createElement("textarea");
+    ta.value = a.text || "";
+    ta.oninput = () => { a.text = ta.value; scheduleSave(); markCard(q); };
+    ta.placeholder = "Eigen tekst toevoegen…";
+
+    if(q.type==="free"){
+      ta.className = "big";
+      ta.placeholder = "Schrijf hier over je dag…";
+      card.appendChild(ta);
+    }
+    else if(q.type==="scale"){
+      const sc = document.createElement("div"); sc.className="scale";
+      const detail = document.createElement("div");
+      const showDetail = () => detail.classList.toggle("hidden", q.detailOn.indexOf(a.level)<0);
+      q.opts.forEach(([val,lab])=>{
+        const b=document.createElement("button"); b.type="button"; b.textContent=lab;
+        b._paint = ()=>{ b.classList.toggle("on", a.level===val); b.classList.toggle("warn", q.detailOn.indexOf(val)>=0); };
+        b._paint();
+        b.onclick=()=>{
+          a.level = a.level===val ? "" : val;
+          sc.querySelectorAll("button").forEach(x=>x._paint());
+          showDetail();
+          scheduleSave(); markCard(q);
+        };
+        sc.appendChild(b);
+      });
+      card.appendChild(sc);
+      showDetail();
+      detail.appendChild(buildRows(q, ta));
+      card.appendChild(detail);
+      card.appendChild(ta);
+    }
+    else if(q.type==="score"){
+      const sc = document.createElement("div"); sc.className="score";
+      const scoreRx = /^Ik geef deze dag een \d+\.?/;
+      for(let n=1;n<=10;n++){
+        const b=document.createElement("button"); b.type="button"; b.textContent=n;
+        if(String(n)===entry.cijfer) b.classList.add("on");
+        b.onclick=()=>{
+          entry.cijfer = entry.cijfer===String(n) ? "" : String(n);
+          sc.querySelectorAll("button").forEach(x=>x.classList.toggle("on", x.textContent===entry.cijfer));
+          const lines = ta.value ? ta.value.split("\n") : [];
+          const j = lines.findIndex(l => scoreRx.test(l));
+          if(entry.cijfer){ const s = "Ik geef deze dag een " + entry.cijfer + "."; if(j>=0) lines[j] = s; else lines.unshift(s); }
+          else if(j>=0) lines.splice(j,1);
+          ta.value = lines.join("\n"); a.text = ta.value;
+          scheduleSave(); markCard(q); };
+        sc.appendChild(b);
+      }
+      card.appendChild(sc);
+      card.appendChild(buildRows(q, ta));
+      card.appendChild(ta);
+    }
+    else {
+      card.appendChild(buildRows(q, ta));
+      card.appendChild(ta);
+    }
+    card.classList.toggle("done", isDone(q));
+    return card;
+  }
+
+  function renderInfo(){
+    $("infoNaam").textContent = settings.naam || "–";
+    const d = daysClean(curKey);
+    $("infoDagen").textContent = d===null ? "–" : d + (d===1?" dag":" dagen");
+    $("infoDatum").textContent = shortDate(curKey);
+    $("openSettings").textContent = (settings.naam||settings.since) ? "Gegevens wijzigen" : "Gegevens instellen (eenmalig)";
+  }
+
+  function render(){
+    $("dateLabel").textContent = niceDate(curKey);
+    $("nextDay").disabled = curKey >= todayKey();
+    renderInfo();
+    if(typeof renderJft === "function") try{ renderJft(); }catch(e){}
+    const qs = $("questions"); qs.innerHTML="";
+    QUESTIONS.forEach((q,i)=>qs.appendChild(buildQuestion(q,i)));
+    updateProgress();
+  }
+  function updateProgress(){
+    const n = QUESTIONS.filter(isDone).length;
+    $("progText").textContent = n+" van "+QUESTIONS.length+" vragen";
+    $("progBar").style.width = (n/QUESTIONS.length*100)+"%";
+  }
+
+  $("prevDay").onclick = () => { const d=parseKey(curKey); d.setDate(d.getDate()-1); loadDay(keyOf(d)); window.scrollTo(0,0); };
+  $("nextDay").onclick = () => { const d=parseKey(curKey); d.setDate(d.getDate()+1); const k=keyOf(d); if(k<=todayKey()){ loadDay(k); window.scrollTo(0,0);} };
+
+  // ---------- settings ----------
+  $("openSettings").onclick = () => {
+    $("setNaam").value = settings.naam||""; $("setSince").value = settings.since||""; $("setMail").value = settings.mail||"";
+    $("setOverlay").classList.add("show");
+  };
+  $("setCancel").onclick = () => $("setOverlay").classList.remove("show");
+  $("setSave").onclick = async () => {
+    settings = {naam:$("setNaam").value.trim(), since:$("setSince").value, mail:$("setMail").value.trim(), updated:Date.now()};
+    local.set("settings", settings);
+    $("setOverlay").classList.remove("show");
+    renderInfo();
+    if(setDoc){ try{ await setDoc.set(Object.assign({}, settings)); }catch(e){} }
+  };
+
+  // ---------- summary ----------
+  function answerText(q, e){
+    const a = e.answers && e.answers[q.id];
+    const txt = a ? (a.text||"").trim() : "";
+    if(q.type==="score") return [e.cijfer && !/^Ik geef deze dag een \d+/m.test(txt) ? "Cijfer: "+e.cijfer : "", txt].filter(Boolean).join("\n");
+    if(q.type==="scale" && a){
+      if(q.doneOn.indexOf(a.level)>=0 && !txt) return q.yesText || q.noText || (q.opts.find(o=>o[0]===a.level)||[])[1] || "";
+      const lab = (q.opts.find(o=>o[0]===a.level)||[])[1];
+      return [lab, txt].filter(Boolean).join(". ").replace(/\.\./g,".");
+    }
+    return txt;
+  }
+  function summaryText(e){
+    const d = (function(){ const keep=curKey; return daysClean(e.date); })();
+    const lines = [
+      "Naam: " + (settings.naam||""),
+      "Aantal dagen nuchter/clean: " + (d===null ? "" : d),
+      "Datum: " + shortDate(e.date),
+      ""
+    ];
+    QUESTIONS.forEach((q,i)=>{
+      lines.push((i+1)+". "+q.title);
+      lines.push(answerText(q,e) || "-");
+      lines.push("");
+    });
+    return lines.join("\n").trim();
+  }
+  function openSummary(e, fromHistory){
+    sumEntry = e;
+    $("docxMsg").textContent = "";
+    $("sumText").textContent = summaryText(e);
+    const n = QUESTIONS.filter(q=>isDoneIn(e,q)).length;
+    let note = n===QUESTIONS.length ? "Goed gedaan, je hebt alle vragen ingevuld." : n+" van "+QUESTIONS.length+" vragen ingevuld.";
+    $("sumNote").textContent = note;
+    $("copyMsg").textContent = "";
+    const mr = $("mailRow"); mr.innerHTML = "";
+    if(settings.mail){
+      mr.appendChild(document.createTextNode("Versturen naar: " + settings.mail + " — kopieer eerst de tekst, dan "));
+      const a = document.createElement("a");
+      a.href = "mailto:" + encodeURIComponent(settings.mail).replace("%40","@") + "?subject=" + encodeURIComponent("Dagbeschouwing " + shortDate(e.date));
+      a.textContent = "open je mail"; a.style.color="var(--accent)";
+      mr.appendChild(a);
+      mr.appendChild(document.createTextNode(" en plak de tekst erin."));
+    }
+    $("editDay").classList.toggle("hidden", !fromHistory);
+    $("editDay").onclick = () => { $("overlay").classList.remove("show"); showTab("today"); loadDay(e.date); window.scrollTo(0,0); };
+    $("overlay").classList.add("show");
+  }
+  $("summaryBtn").onclick = async () => { if(dirty){ clearTimeout(saveTimer); await flush(); } openSummary(entry, false); };
+  $("closeSum").onclick = () => $("overlay").classList.remove("show");
+  $("overlay").onclick = e => { if(e.target.id==="overlay") $("overlay").classList.remove("show"); };
+  $("setOverlay").onclick = e => { if(e.target.id==="setOverlay") $("setOverlay").classList.remove("show"); };
+  $("copySum").onclick = async () => {
+    const t = $("sumText").textContent;
+    try{ await navigator.clipboard.writeText(t); $("copyMsg").textContent="Gekopieerd. Je kunt het nu in je mail plakken."; }
+    catch(e){
+      const r=document.createRange(); r.selectNodeContents($("sumText")); const s=getSelection(); s.removeAllRanges(); s.addRange(r);
+      $("copyMsg").textContent="Kopiëren lukte niet automatisch. De tekst is geselecteerd: kies Kopieer.";
+    }
+  };
+
+  // ---------- Word file ----------
+  async function offerFile(filename, data, mime){
+    const dl = (window.claude && window.claude.use) ? await window.claude.use("downloads") : null;
+    if(dl) return dl.save({filename, data});
+    const blob = data instanceof Blob ? data : new Blob([data], {type: mime});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 60000);
+    return {status:"saved"};
+  }
+
+  let sumEntry = null;
+  const xesc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  function wRun(text, opts){
+    opts = opts || {};
+    const rpr = (opts.b?"<w:b/>":"") + (opts.i?"<w:i/>":"") + (opts.color?'<w:color w:val="'+opts.color+'"/>':"") + (opts.sz?'<w:sz w:val="'+opts.sz+'"/>':"");
+    return '<w:r>'+(rpr?'<w:rPr>'+rpr+'</w:rPr>':'')+'<w:t xml:space="preserve">'+xesc(text)+'</w:t></w:r>';
+  }
+  function wPara(text, opts){
+    opts = opts || {};
+    const spacing = '<w:spacing w:before="'+(opts.before||0)+'" w:after="'+(opts.after==null?80:opts.after)+'"/>';
+    return '<w:p><w:pPr>'+spacing+'</w:pPr>'+(text?wRun(text,opts):'')+'</w:p>';
+  }
+  function wCell(paras, shade){
+    return '<w:tc><w:tcPr><w:tcW w:w="9360" w:type="dxa"/>'+(shade?'<w:shd w:val="clear" w:color="auto" w:fill="'+shade+'"/>':'')+
+      '<w:tcMar><w:top w:w="100" w:type="dxa"/><w:bottom w:w="100" w:type="dxa"/><w:left w:w="140" w:type="dxa"/><w:right w:w="140" w:type="dxa"/></w:tcMar></w:tcPr>'+paras+'</w:tc>';
+  }
+  function documentXml(e){
+    const d = daysClean(e.date);
+    let body = "";
+    body += '<w:p><w:pPr><w:spacing w:after="80"/></w:pPr>'+wRun("Naam : ",{b:true})+wRun(settings.naam||"")+'</w:p>';
+    body += '<w:p><w:pPr><w:spacing w:after="80"/></w:pPr>'+wRun("Aantal dagen nuchter/clean : ",{b:true})+wRun(d===null?"":String(d))+'</w:p>';
+    body += '<w:p><w:pPr><w:spacing w:after="200"/></w:pPr>'+wRun("Datum : ",{b:true})+wRun(shortDate(e.date))+'</w:p>';
+    body += wPara("Bij een dagbeschouwing doe je zelfonderzoek. Je gaat na wat er op de dag goed verlopen is en wat voor verbetering vatbaar is. Wees open en eerlijk.",{i:true,after:240});
+    const border = '<w:tblBorders>'+["top","left","bottom","right","insideH","insideV"].map(s=>'<w:'+s+' w:val="single" w:sz="4" w:space="0" w:color="999999"/>').join("")+'</w:tblBorders>';
+    let rows = "";
+    QUESTIONS.forEach((q,i)=>{
+      rows += '<w:tr>'+wCell(wPara((i+1)+".  "+q.title,{b:true,after:0}), "E3EFEB")+'</w:tr>';
+      const lines = (answerText(q,e) || "").split("\n");
+      const paras = lines.map(l=>wPara(l,{after:40})).join("") || wPara("");
+      rows += '<w:tr>'+wCell(paras)+'</w:tr>';
+    });
+    body += '<w:tbl><w:tblPr><w:tblW w:w="9360" w:type="dxa"/>'+border+'<w:tblLayout w:type="fixed"/></w:tblPr><w:tblGrid><w:gridCol w:w="9360"/></w:tblGrid>'+rows+'</w:tbl>';
+    body += wPara("");
+    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+      '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>'+body+
+      '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134" w:header="708" w:footer="708" w:gutter="0"/></w:sectPr></w:body></w:document>';
+  }
+  const DOCX_PARTS = {
+    "[Content_Types].xml": '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/></Types>',
+    "_rels/.rels": '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>',
+    "word/_rels/document.xml.rels": '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>',
+    "word/styles.xml": '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri"/><w:sz w:val="22"/><w:lang w:val="nl-NL"/></w:rPr></w:rPrDefault></w:docDefaults></w:styles>'
+  };
+  window.__dagDocParts = (e)=>Object.assign({}, DOCX_PARTS, {"word/document.xml": documentXml(e)});
+
+  $("saveDocx").onclick = async () => {
+    const msg = $("docxMsg");
+    if(!sumEntry) return;
+    if(dirty){ clearTimeout(saveTimer); await flush(); }
+    msg.textContent = "Bestand maken…";
+    try{
+      if(!window.JSZip) throw {code:"nozip"};
+      const zip = new JSZip();
+      const parts = window.__dagDocParts(sumEntry);
+      Object.keys(parts).forEach(k=>zip.file(k, parts[k]));
+      const blob = await zip.generateAsync({type:"blob", mimeType:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
+      await offerFile("Dagbeschouwing "+sumEntry.date+".docx", blob, "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+      msg.textContent = "Klaar. Kies in het deelmenu Mail, of voeg het bestand als bijlage toe aan je mail.";
+    }catch(err){
+      const c = err && err.code;
+      if(c==="declined") msg.textContent = "Niet opgeslagen.";
+      else if(c==="rate_limited") msg.textContent = "Even wachten en dan opnieuw proberen.";
+      else if(c==="nozip") msg.textContent = "Het bestand kon niet worden gemaakt (geen verbinding?). Gebruik Kopieer tekst.";
+      else msg.textContent = "Opslaan lukte niet hier. Gebruik Kopieer tekst en plak het in je mail.";
+    }
+  };
+
+  // ---------- PDF file ----------
+  const HELV=[278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584,761,556,500,222,556,333,1000,556,556,333,1000,667,333,1000,500,611,500,500,222,222,333,333,350,556,1000,333,1000,500,333,944,500,500,667,278,333,556,556,556,556,260,556,333,737,370,556,584,333,737,333,400,584,333,333,333,556,537,278,333,333,365,556,834,834,834,611,667,667,667,667,667,667,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,500,556,556,556,556,278,278,278,278,556,556,556,556,556,556,556,584,611,556,556,556,556,500,556,500];
+  const HELVB=[278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,611,611,389,556,333,611,556,778,556,556,500,389,280,389,584,761,556,500,278,556,500,1000,556,556,333,1000,667,333,1000,500,611,500,500,278,278,500,500,350,556,1000,333,1000,556,333,944,500,500,667,278,333,556,556,556,556,280,556,333,737,370,556,584,333,737,333,400,584,333,333,333,611,556,278,333,333,365,556,834,834,834,611,722,722,722,722,722,722,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,556,556,556,556,556,278,278,278,278,611,611,611,611,611,611,611,584,611,611,611,611,611,556,611,556];
+  const CP_EXTRA = {"€":128,"‚":130,"ƒ":131,"„":132,"…":133,"†":134,"‡":135,"ˆ":136,"‰":137,"Š":138,"‹":139,"Œ":140,"Ž":142,"‘":145,"’":146,"“":147,"”":148,"•":149,"–":150,"—":151,"˜":152,"™":153,"š":154,"›":155,"œ":156,"ž":158,"Ÿ":159};
+  function cp1252(s){
+    let out = "";
+    for(const ch of String(s).normalize("NFC")){
+      const c = ch.codePointAt(0);
+      if(c === 9) out += " ";
+      else if((c >= 32 && c < 127) || (c >= 160 && c < 256)) out += String.fromCharCode(c);
+      else if(CP_EXTRA[ch]) out += String.fromCharCode(CP_EXTRA[ch]);
+      else if(c === 0x2010 || c === 0x2011) out += "-";
+      else if(c > 0xFFFF || (c >= 0x2600 && c < 0x2800)) out += "";
+      else out += "?";
+    }
+    return out;
+  }
+  function textW(bin, size, bold){
+    const t = bold ? HELVB : HELV; let w = 0;
+    for(let i=0;i<bin.length;i++){ const c = bin.charCodeAt(i); w += (c>=32 && c<256) ? t[c-32] : 500; }
+    return w * size / 1000;
+  }
+  function wrap(text, size, bold, maxW){
+    const out = [];
+    String(text).split("\n").forEach(par => {
+      const words = cp1252(par).split(" ");
+      let line = "";
+      words.forEach(wd => {
+        const cand = line ? line + " " + wd : wd;
+        if(textW(cand, size, bold) <= maxW || !line){
+          if(!line && textW(wd, size, bold) > maxW){
+            let piece = "";
+            for(const ch of wd){ if(textW(piece+ch,size,bold) > maxW){ out.push(piece); piece = ch; } else piece += ch; }
+            line = piece;
+          } else line = cand;
+        } else { out.push(line); line = wd; }
+      });
+      out.push(line);
+    });
+    return out;
+  }
+  const pesc = b => b.replace(/\\/g,"\\\\").replace(/\(/g,"\\(").replace(/\)/g,"\\)");
+
+  function buildPdf(e){
+    const W = 595.28, H = 841.89, M = 54, CW = W - 2*M, PAD = 7, SZ = 10.5, LH = 14;
+    const pages = []; let ops = []; let y = H - M;
+    const newPage = () => { ops = []; pages.push(ops); y = H - M; };
+    const txt = (s, x, yy, size, font) => ops.push("0 g BT /"+font+" "+size+" Tf "+x.toFixed(2)+" "+yy.toFixed(2)+" Td ("+pesc(s)+") Tj ET");
+    const rect = (x, yy, w, h, fill) => ops.push(fill ? fill+" rg "+x.toFixed(2)+" "+yy.toFixed(2)+" "+w.toFixed(2)+" "+h.toFixed(2)+" re f" : "0.6 G 0.6 w "+x.toFixed(2)+" "+yy.toFixed(2)+" "+w.toFixed(2)+" "+h.toFixed(2)+" re S");
+    newPage();
+    const d = daysClean(e.date);
+    [["Naam : ", settings.naam||""],["Aantal dagen nuchter/clean : ", d===null?"":String(d)],["Datum : ", shortDate(e.date)]].forEach(([k,v]) => {
+      const kb = cp1252(k); txt(kb, M, y-SZ, 11, "F2"); txt(cp1252(v), M + textW(kb,11,true), y-SZ, 11, "F1"); y -= 17;
+    });
+    y -= 8;
+    wrap("Bij een dagbeschouwing doe je zelfonderzoek. Je gaat na wat er op de dag goed verlopen is en wat voor verbetering vatbaar is. Wees open en eerlijk.", SZ, false, CW).forEach(l => { txt(l, M, y-SZ, SZ, "F3"); y -= LH; });
+    y -= 12;
+    const bottom = M;
+    QUESTIONS.forEach((q, i) => {
+      const ql = wrap((i+1)+".  "+q.title, SZ, true, CW - 2*PAD);
+      const al = wrap(answerText(q, e) || "", SZ, false, CW - 2*PAD);
+      const qh = ql.length*LH + 2*PAD;
+      if(y - qh - (LH + 2*PAD) < bottom) newPage();
+      rect(M, y-qh, CW, qh, "0.890 0.937 0.922"); rect(M, y-qh, CW, qh);
+      let ty = y - PAD - SZ + 1; ql.forEach(l => { txt(l, M+PAD, ty, SZ, "F2"); ty -= LH; });
+      y -= qh;
+      let boxTop = y, k = 0;
+      const lines = al.length ? al : [""];
+      while(k < lines.length){
+        let yy = boxTop - PAD - SZ + 1, n = 0;
+        while(k < lines.length && yy - 3 > bottom + PAD){ if(lines[k]) txt(lines[k], M+PAD, yy, SZ, "F1"); yy -= LH; k++; n++; }
+        const bh = Math.max(n, 1)*LH + 2*PAD;
+        rect(M, boxTop - bh, CW, bh);
+        y = boxTop - bh;
+        if(k < lines.length){ newPage(); boxTop = y; }
+      }
+      y -= 0;
+    });
+    // assemble
+    const objs = [];
+    objs[1] = "<< /Type /Catalog /Pages 2 0 R >>";
+    const fontObj = n => "<< /Type /Font /Subtype /Type1 /BaseFont /"+n+" /Encoding /WinAnsiEncoding >>";
+    objs[3] = fontObj("Helvetica"); objs[4] = fontObj("Helvetica-Bold"); objs[5] = fontObj("Helvetica-Oblique");
+    const kids = [];
+    pages.forEach((p, i) => {
+      const pid = 6 + i*2, cid = pid + 1;
+      const stream = p.join("\n");
+      objs[cid] = "<< /Length "+stream.length+" >>\nstream\n"+stream+"\nendstream";
+      objs[pid] = "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 "+W+" "+H+"] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents "+cid+" 0 R >>";
+      kids.push(pid+" 0 R");
+    });
+    objs[2] = "<< /Type /Pages /Kids ["+kids.join(" ")+"] /Count "+pages.length+" >>";
+    let out = "%PDF-1.4\n%\xE2\xE3\xCF\xD3\n"; const offs = [];
+    for(let i=1;i<objs.length;i++){ offs[i] = out.length; out += i+" 0 obj\n"+objs[i]+"\nendobj\n"; }
+    const xref = out.length;
+    out += "xref\n0 "+objs.length+"\n0000000000 65535 f \n";
+    for(let i=1;i<objs.length;i++) out += String(offs[i]).padStart(10,"0")+" 00000 n \n";
+    out += "trailer\n<< /Size "+objs.length+" /Root 1 0 R >>\nstartxref\n"+xref+"\n%%EOF\n";
+    const bytes = new Uint8Array(out.length);
+    for(let i=0;i<out.length;i++) bytes[i] = out.charCodeAt(i) & 255;
+    return bytes;
+  }
+  window.__dagPdf = e => buildPdf(e);
+
+  $("savePdf").onclick = async () => {
+    const msg = $("docxMsg");
+    if(!sumEntry) return;
+    if(dirty){ clearTimeout(saveTimer); await flush(); }
+    try{
+      const bytes = buildPdf(sumEntry);
+      await offerFile("Dagbeschouwing "+sumEntry.date+".pdf", bytes, "application/pdf");
+      msg.textContent = "Klaar. Kies in het deelmenu Mail, of voeg het bestand als bijlage toe aan je mail.";
+    }catch(err){
+      const c = err && err.code;
+      if(c==="declined") msg.textContent = "Niet opgeslagen.";
+      else if(c==="rate_limited") msg.textContent = "Even wachten en dan opnieuw proberen.";
+      else msg.textContent = "Opslaan lukte niet hier. Gebruik Kopieer tekst en plak het in je mail.";
+    }
+  };
+
+  // ---------- history ----------
+  async function allDays(){
+    if(dirty){ clearTimeout(saveTimer); await flush(); }
+    const map = {};
+    local.days().forEach(e=>{ if(e && e.date) map[e.date]=e; });
+    if(col){
+      try{
+        const snap = await col.orderBy("date","desc").limit(1000).get();
+        snap.docs.forEach(d=>{ const e=d.data(); if(e && e.date && (!map[e.date] || (e.updated||0)>=(map[e.date].updated||0))) map[e.date]=e; });
+      }catch(e){}
+    }
+    return map;
+  }
+  const hasContent = e => e.cijfer || Object.values(e.answers||{}).some(a=>a.level||(a.text||"").trim());
+
+  $("backupMake").onclick = async () => {
+    const msg = $("backupMsg");
+    msg.textContent = "Back-up maken…";
+    try{
+      const map = await allDays();
+      const days = Object.values(map).filter(hasContent).sort((a,b)=>a.date<b.date?-1:1);
+      const data = JSON.stringify({app:"mijn-dag", versie:1, gemaakt:new Date().toISOString(), instellingen:settings, dagen:days}, null, 1);
+      await offerFile("Mijn dag back-up "+todayKey()+".json", data, "application/json");
+      msg.textContent = "Back-up met "+days.length+(days.length===1?" dag":" dagen")+" gemaakt. Bewaar het bestand op een veilige plek, bijvoorbeeld in iCloud Drive of je mail.";
+    }catch(err){
+      msg.textContent = err && err.code==="declined" ? "Niet opgeslagen." : "Back-up maken lukte niet.";
+    }
+  };
+  $("backupRestore").onclick = () => $("backupFile").click();
+  $("backupFile").onchange = async ev => {
+    const f = ev.target.files && ev.target.files[0]; ev.target.value = "";
+    if(!f) return;
+    const msg = $("backupMsg");
+    try{
+      const data = JSON.parse(await f.text());
+      if(!data || data.app!=="mijn-dag" || !Array.isArray(data.dagen)) throw 0;
+      const map = await allDays();
+      let added = 0, kept = 0;
+      for(const e of data.dagen){
+        if(!e || !/^\d{4}-\d{2}-\d{2}$/.test(e.date||"")) continue;
+        const cur = map[e.date];
+        if(cur && hasContent(cur) && (cur.updated||0) >= (e.updated||0)){ kept++; continue; }
+        const clean = {date:e.date, answers:e.answers||{}, cijfer:e.cijfer||"", updated:e.updated||Date.now()};
+        local.set("day:"+clean.date, clean);
+        if(col){ try{ await col.doc(clean.date).set(clean); }catch(err){} }
+        added++;
+      }
+      if(data.instellingen && !(settings.naam || settings.since)){
+        settings = Object.assign({naam:"",since:"",mail:""}, data.instellingen, {updated:Date.now()});
+        local.set("settings", settings);
+        if(setDoc){ try{ await setDoc.set(Object.assign({}, settings)); }catch(err){} }
+      }
+      msg.textContent = added+(added===1?" dag":" dagen")+" teruggezet."+(kept? " "+kept+" "+(kept===1?"dag stond":"dagen stonden")+" er al in een nieuwere versie en zijn niet overschreven." : "");
+      entry = local.get("day:"+curKey) || entry;
+      render(); renderHistory();
+    }catch(err){
+      msg.textContent = "Dit bestand kon ik niet lezen. Kies een back-up van Mijn dag (een .json-bestand).";
+    }
+  };
+
+  async function renderHistory(){
+    const v = $("viewHist");
+    v.innerHTML = '<div class="empty">Laden…</div>';
+    const map = {};
+    local.days().forEach(e=>{ if(e && e.date) map[e.date]=e; });
+    if(col){
+      try{
+        const snap = await col.orderBy("date","desc").limit(500).get();
+        snap.docs.forEach(d=>{ const e=d.data(); if(e && e.date && (!map[e.date] || (e.updated||0)>=(map[e.date].updated||0))) map[e.date]=e; });
+      }catch(e){}
+    }
+    const list = Object.values(map).filter(e=>e.cijfer || Object.values(e.answers||{}).some(a=>a.level||(a.text||"").trim()))
+      .sort((a,b)=>a.date<b.date?1:-1);
+    v.innerHTML = "";
+    if(!list.length){ v.innerHTML='<div class="empty">Nog geen eerdere dagen. Na je eerste dagbeschouwing verschijnt die hier.</div>'; return; }
+    list.forEach(e=>{
+      const c=document.createElement("div"); c.className="card item";
+      const first = ((e.answers&&e.answers.q1&&e.answers.q1.text)||"").trim();
+      c.innerHTML='<div class="emo"></div><div style="flex:1;min-width:0"><div class="t"></div><div class="s"></div></div><div style="color:var(--muted)">›</div>';
+      c.querySelector(".emo").textContent = e.cijfer || "–";
+      c.querySelector(".t").textContent = niceDate(e.date);
+      c.querySelector(".s").textContent = first.replace(/\n+/g," ") || "Bekijk dagbeschouwing";
+      c.onclick = () => openSummary(e, true);
+      v.appendChild(c);
+    });
+  }
+
+  function showTab(t){
+    $("tabToday").classList.toggle("on", t==="today");
+    $("tabHist").classList.toggle("on", t==="hist");
+    $("viewToday").classList.toggle("hidden", t!=="today");
+    $("viewHistWrap").classList.toggle("hidden", t!=="hist");
+    $("bottomBar").classList.toggle("hidden", t!=="today");
+    if(t==="hist") renderHistory();
+  }
+  $("tabToday").onclick = () => showTab("today");
+  $("tabHist").onclick = () => showTab("hist");
+
+  // ---------- Alleen voor vandaag (own PDF, read on the device) ----------
+  const MONTHS = ["januari","februari","maart","april","mei","juni","juli","augustus","september","oktober","november","december"];
+  const MDAYS = [31,29,31,30,31,30,31,31,30,31,30,31];
+  const JFT_KEY = "dagbeschouwing:jft";
+  let jft = (function(){ try{ const v = localStorage.getItem(JFT_KEY); return v ? JSON.parse(v) : null; }catch(e){ return null; } })();
+  let jftOpen = false;
+
+  function itemsToLines(items, page){
+    const its = items.filter(it => it.str && it.str.trim() !== "").map(it => ({
+      s: it.str, x: it.transform[4], y: it.transform[5], w: it.width || 0, h: Math.abs(it.height || it.transform[3] || 10)
+    })).sort((a,b) => (b.y - a.y) || (a.x - b.x));
+    const lines = [];
+    its.forEach(it => {
+      const last = lines[lines.length-1];
+      if(last && Math.abs(last.y - it.y) < Math.max(2, it.h*0.4)) last.parts.push(it);
+      else lines.push({y: it.y, h: it.h, parts: [it]});
+    });
+    return lines.map(l => {
+      l.parts.sort((a,b) => a.x - b.x);
+      let txt = "", end = null, big = false;
+      l.parts.forEach(p => {
+        if(end !== null){
+          const gap = p.x - end;
+          if(gap > l.h*1.2) big = true;
+          if(gap > l.h*0.15 && !/\s$/.test(txt) && !/^\s/.test(p.s)) txt += " ";
+        }
+        txt += p.s; end = p.x + p.w;
+      });
+      return {text: txt.replace(/\s+/g," ").trim(), y: l.y, h: l.h, page: page};
+    }).filter(l => l.text);
+  }
+
+  function parseJft(lines){
+    const mp = MONTHS.join("|");
+    const ra = new RegExp("^(\\d{1,2})\\s+("+mp+")(?:\\s+(.*))?$","i");
+    const rb = new RegExp("^(.*\\S)\\s+(\\d{1,2})\\s+("+mp+")$","i");
+    const exp = [];
+    MONTHS.forEach((m,mi) => { for(let d=1; d<=MDAYS[mi]; d++) exp.push([d,m]); });
+    const hits = [];
+    let k = 0;
+    for(let i=0; i<lines.length && k<exp.length; i++){
+      const t = lines[i].text;
+      let d=null, m=null, rest="";
+      let x = t.match(ra);
+      if(x){ d=+x[1]; m=x[2].toLowerCase(); rest=x[3]||""; }
+      else { const y = t.length < 100 && t.match(rb); if(y){ d=+y[2]; m=y[3].toLowerCase(); rest=y[1]; } }
+      if(d===exp[k][0] && m===exp[k][1]){ hits.push({i, d, m, rest: rest.trim()}); k++; }
+    }
+    if(hits.length < 300) return null;
+    const monthOnly = new RegExp("^("+mp+")$","i");
+    const out = {};
+    hits.forEach((h, n) => {
+      const endI = n+1 < hits.length ? hits[n+1].i : Math.min(lines.length, h.i + 60);
+      let body = lines.slice(h.i+1, endI).filter(l => !monthOnly.test(l.text) && !/^\d{1,3}$/.test(l.text));
+      let title = h.rest;
+      if(!title && body.length){ title = body[0].text; body = body.slice(1); }
+      const gaps = [];
+      for(let j=1; j<body.length; j++) if(body[j].page===body[j-1].page){ const g = body[j-1].y - body[j].y; if(g>0) gaps.push(g); }
+      gaps.sort((a,b)=>a-b);
+      const med = gaps.length ? gaps[Math.floor(gaps.length/2)] : 14;
+      const paras = [];
+      let cur = null, prev = null;
+      body.forEach(l => {
+        const startAvv = /^Alleen voor vandaag\s*:/i.test(l.text);
+        const gapBreak = prev && prev.page === l.page && (prev.y - l.y) > med * 1.45;
+        if(!cur || gapBreak || startAvv){ cur = {t: l.text}; paras.push(cur); }
+        else cur.t = /-$/.test(cur.t) && !/ -$/.test(cur.t) ? cur.t.slice(0,-1) + l.text : cur.t + " " + l.text;
+        prev = l;
+      });
+      out[pad(MONTHS.indexOf(h.m)+1)+"-"+pad(h.d)] = {title: title, paras: paras.map(p => p.t.trim()).filter(t => /[\p{L}\p{N}]/u.test(t))};
+    });
+    return out;
+  }
+
+  function loadScript(src){
+    return new Promise((res, rej) => { const s = document.createElement("script"); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
+  }
+  async function readPdf(file){
+    const base = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/";
+    if(!window.pdfjsLib){ await loadScript(base+"pdf.min.js"); await loadScript(base+"pdf.worker.min.js"); }
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = base+"pdf.worker.min.js";
+    const buf = await file.arrayBuffer();
+    const pdf = await window.pdfjsLib.getDocument({data: new Uint8Array(buf), isEvalSupported: false}).promise;
+    const lines = [];
+    for(let p=1; p<=pdf.numPages; p++){
+      if(p % 10 === 0) $("jftMsg").textContent = "Bestand lezen… pagina " + p + " van " + pdf.numPages;
+      const page = await pdf.getPage(p);
+      const tc = await page.getTextContent();
+      itemsToLines(tc.items, p).forEach(l => lines.push(l));
+      page.cleanup && page.cleanup();
+    }
+    return parseJft(lines);
+  }
+  window.__jftParse = (pages) => { const lines=[]; pages.forEach((items,i)=>itemsToLines(items,i+1).forEach(l=>lines.push(l))); return parseJft(lines); };
+
+  function renderJft(){
+    const has = jft && jft.entries;
+    $("jftHave").classList.toggle("hidden", !has);
+    $("jftNone").classList.toggle("hidden", !!has);
+    if(!has) return;
+    const d = parseKey(curKey);
+    const key = pad(d.getMonth()+1)+"-"+pad(d.getDate());
+    const e = jft.entries[key];
+    $("jftDate").textContent = d.getDate()+" "+MONTHS[d.getMonth()];
+    $("jftTitle").textContent = e ? e.title : "Geen tekst gevonden voor deze datum";
+    const body = $("jftBody"); body.innerHTML = "";
+    if(e) e.paras.forEach((t,i) => {
+      const p = document.createElement("p"); p.textContent = t;
+      if(/^Alleen voor vandaag\s*:/i.test(t)) p.className = "avv";
+      else if(i===0 && /^[‘'“"]/.test(t)) p.className = "quote";
+      body.appendChild(p);
+    });
+    body.classList.toggle("hidden", !jftOpen || !e);
+    $("jftToggle").classList.toggle("hidden", !e);
+    $("jftToggle").textContent = jftOpen ? "Tekst inklappen" : "Lees de tekst";
+  }
+  $("jftToggle").onclick = () => { jftOpen = !jftOpen; renderJft(); };
+  $("jftPick").onclick = () => $("jftFile").click();
+  $("jftChange").onclick = () => $("jftFile").click();
+  $("jftFile").onchange = async ev => {
+    const f = ev.target.files && ev.target.files[0];
+    ev.target.value = "";
+    if(!f) return;
+    const msg = $("jftMsg");
+    msg.textContent = "Bestand lezen… dit kan even duren.";
+    try{
+      const entries = await readPdf(f);
+      if(!entries){ msg.textContent = "In dit bestand kon ik de dagen niet vinden. Is het de PDF van ‘Alleen voor vandaag’?"; return; }
+      jft = {entries: entries, count: Object.keys(entries).length, loaded: Date.now()};
+      let stored = true;
+      try{ localStorage.setItem(JFT_KEY, JSON.stringify(jft)); }catch(e){ stored = false; }
+      msg.textContent = jft.count + " dagen gevonden." + (stored ? "" : " Let op: opslaan op dit toestel lukte niet, dus je moet het bestand de volgende keer opnieuw kiezen.");
+      jftOpen = false;
+      renderJft();
+    }catch(e){
+      msg.textContent = "Het bestand lezen lukte niet. Controleer je internetverbinding en probeer het nog eens.";
+    }
+  };
+
+  // ---------- start ----------
+  render();
+  setStatus(baseStatus());
+  initDb().then(async ()=>{ setStatus(baseStatus()); if(col){ await syncSettings(); loadDay(curKey); } });
+})();
+</script>
+</body>
+</html>
